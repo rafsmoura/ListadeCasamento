@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Lista de Casamento</string>
+    <string name="action_settings">Enviar</string>
+    <string name="select_all_text">Selecionar todos</string>
+    <string name="contatc_holder_name">Han Solo</string>
+    <string name="contatc_number">21 985164708</string>
+    <string name="date_and_time">06/04/2016 - 08:00</string>
+    <string name="status">Não Enviado</string>
+    <string name="sent">Enviado</string>
+    <string name="not_sent">Não enviado</string>
+    <string name="no_contacts">Aperte o \"+\" para adiconar convidados</string>
+    <string name="contact_name_hint">Nome do convidado</string>
+    <string name="contact_number_hint">Telefone</string>
+    <string name="add_contact">Adicionar</string>
+    <string name="remove_contact">Remover</string>
+    <string name="error_text">Verifique os campos</string>
+    <string name="edit_contact">Alterar</string>
+    <string name="error_delete_contact">Você deve enviar a mensagem antes de apagar um convidado</string>
+    <string name="sent_msg_text">%1$s, obrigado por comparecer ao meu casamento!</string>
+    <string name="alert_title">Enviar Agradecimentos</string>
+    <string name="alert_message">Tem certeza que deseja enviar ?</string>
+    <string name="send">Enviar</string>
+    <string name="no_send">Enviar mais tarde</string>
+    <string name="permission">Você deve habilitar o envio de sms!</string>
+    <string name="no_contacts_selected">Selecione ao menos um contato</string>
+
+</resources>

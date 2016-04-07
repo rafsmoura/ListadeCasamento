@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/contactName"
+            android:layout_width="match_parent"
+            android:hint="@string/contact_name_hint"
+            android:inputType="textCapWords"
+            android:layout_height="wrap_content" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/contactNumber"
+            android:layout_width="match_parent"
+            android:hint="@string/contact_number_hint"
+            android:maxLength="11"
+            android:inputType="phone"
+            android:layout_height="wrap_content" />
+    </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/addContact"
+            android:layout_width="match_parent"
+            android:text="@string/add_contact"
+            android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/removeContact"
+        android:layout_width="match_parent"
+        android:text="@string/remove_contact"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
