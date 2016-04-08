@@ -29,5 +29,6 @@
     <string name="loading_title">Enviando...</string>
     <string name="loading_msg">Enviando SMS de agradecimento</string>
     <string name="sent_to">Enviando SMS para %1$s</string>
+    <string name="fail">Você deve enviar os contatos mais antigos primeiro</string>
 
 </resources>

@@ -1,10 +1,15 @@
 package br.com.listadecasamento;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,7 +22,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     private FloatingActionButton fab;
     private boolean deleteList;
+    private boolean messageSent = false;
+    private String SENT = "SMS_SENT";
+
+    private BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +147,46 @@ public class MainActivity extends AppCompatActivity {
 
             createScreen();
 
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                if (TextUtils.equals(SENT, intent.getAction())) {
+
+                    switch (getResultCode()) {
+
+                        case Activity.RESULT_OK:
+                            messageSent = true;
+                            break;
+                        case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                            messageSent = true;
+                            break;
+                        case SmsManager.RESULT_ERROR_NO_SERVICE:
+                            messageSent = true;
+                            break;
+
+                        case SmsManager.RESULT_ERROR_NULL_PDU:
+                            messageSent = true;
+                            break;
+
+                        case SmsManager.RESULT_ERROR_RADIO_OFF:
+                            messageSent = true;
+                            ;
+                            break;
+
+                        default:
+                            messageSent = false;
+                            break;
+
+                    }
+                }
+
+            }
+        };
+
+
+        registerReceiver(receiver, new IntentFilter(SENT));
+
     }
 
     public void createScreen() {
@@ -189,6 +238,17 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(SENT));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
 
     private void sendSms() {
 
@@ -351,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
 
         private List<Contact> list;
         private ProgressDialog dialog;
+        private boolean fail;
 
         public Kevin(List<Contact> list) {
             this.list = list;
@@ -374,15 +435,25 @@ public class MainActivity extends AppCompatActivity {
             SmsManager manager = SmsManager.getDefault();
             for (int i = 0; i < list.size(); i++) {
                 Contact c = list.get(i);
-                Log.d("==CONTACT==", c.getContactName());
+                boolean isOldest = Cache.getInstance().isOldest(context, c);
+
+                if (!isOldest) {
+                    fail = true;
+                    return null;
+                }
+
                 if (!c.isAlreadySent()) {
 
                     publishProgress(c.getContactName());
 
+                    Intent intent = new Intent(SENT);
+
+                    PendingIntent pi = PendingIntent.getBroadcast(context, Activity.RESULT_OK, intent, 0);
+
                     manager.sendTextMessage(c.getContactNumber(),
                             null,
                             getString(R.string.sent_msg_text, c.getContactName()),
-                            null,
+                            pi,
                             null);
 
                     c.setAlreadySent(true);
@@ -390,11 +461,22 @@ public class MainActivity extends AppCompatActivity {
 
                     Cache.getInstance().saveContact(context, c);
 
+
                     try {
-                        Thread.sleep(2 * 1000);
+                        Thread.sleep(3 * 1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+
+//                    while (!messageSent) {
+//                        //Lock o thread...
+//                    }
+//
+//                    Log.d("==MESSAGE==", messageSent + "");
+//
+//                    messageSent = false;
+
                 }
             }
 
@@ -414,6 +496,12 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(aVoid);
             dialog.dismiss();
             createScreen();
+
+            if (fail) {
+                Toast.makeText(context, R.string.fail, Toast.LENGTH_LONG).show();
+            }
         }
     }
+
+
 }

@@ -137,5 +137,24 @@ public class Cache {
 
     }
 
+    public boolean isOldest(Context context, Contact contact) {
+
+        List<Contact> contacts = getContacts(context);
+
+        boolean isOldest = true;
+
+        for (int i = 0; i < contacts.size(); i++) {
+
+            if (contact.getRegisterDate().compareTo(contacts.get(i).getRegisterDate()) > 0 &&
+                    !contacts.get(i).isAlreadySent()) {
+
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
 
 }
