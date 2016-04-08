@@ -141,7 +141,7 @@ public class Cache {
 
         List<Contact> contacts = getContacts(context);
 
-        boolean isOldest = true;
+        //boolean isOldest = true;
 
         for (int i = 0; i < contacts.size(); i++) {
 
