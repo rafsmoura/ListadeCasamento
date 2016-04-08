@@ -1,10 +1,7 @@
 package br.com.listadecasamento.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +30,21 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<Contact> contacts;
     private List<CheckBox> checkBoxes = new ArrayList<>();
     private Context context;
+    private boolean deleteList;
 
     public ListAdapter(List<Contact> contacts, Context context) {
         this.context = context;
         this.contacts = contacts;
+        this.deleteList = false;
+        Collections.sort(this.contacts);
+        setHasStableIds(true);
+    }
+
+    public ListAdapter(List<Contact> contacts, Context context, boolean deleteList) {
+        this.context = context;
+        this.contacts = contacts;
+        Collections.sort(this.contacts);
+        this.deleteList = deleteList;
         setHasStableIds(true);
     }
 
@@ -84,7 +92,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         if (contact.isAlreadySent()) {
             holder.status.setText(context.getString(R.string.sent));
-        } else {
+
+            if (this.deleteList) {
+                holder.status.setText(context.getString(R.string.sent));
+                CheckBox checkBox = (CheckBox) View.inflate(context, R.layout.checkbox, null);
+                checkBox.setTag(contact);
+                checkBoxes.add(checkBox);
+
+                holder.checkboxLayout.addView(checkBox);
+            }
+
+        } else if (!this.deleteList) {
             holder.status.setText(context.getString(R.string.not_sent));
             CheckBox checkBox = (CheckBox) View.inflate(context, R.layout.checkbox, null);
             checkBox.setTag(contact);

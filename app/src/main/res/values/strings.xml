@@ -16,6 +16,7 @@
     <string name="error_text">Verifique os campos</string>
     <string name="edit_contact">Alterar</string>
     <string name="error_delete_contact">Você deve enviar a mensagem antes de apagar um convidado</string>
+    <string name="error_delete_n_contacts">Selecione ao menos um convidado</string>;
     <string name="sent_msg_text">%1$s, obrigado por comparecer ao meu casamento!</string>
     <string name="alert_title">Enviar Agradecimentos</string>
     <string name="alert_message">Tem certeza que deseja enviar ?</string>
@@ -23,5 +24,10 @@
     <string name="no_send">Enviar mais tarde</string>
     <string name="permission">Você deve habilitar o envio de sms!</string>
     <string name="no_contacts_selected">Selecione ao menos um contato</string>
+    <string name="delete_all_contacts">Apagar</string>
+    <string name="delete_cancel">Cancelar</string>
+    <string name="loading_title">Enviando...</string>
+    <string name="loading_msg">Enviando SMS de agradecimento</string>
+    <string name="sent_to">Enviando SMS para %1$s</string>
 
 </resources>

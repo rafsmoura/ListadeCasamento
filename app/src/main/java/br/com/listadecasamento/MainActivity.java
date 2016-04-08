@@ -2,26 +2,26 @@ package br.com.listadecasamento;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
@@ -44,7 +44,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView noContactsLabel;
     private ListAdapter listAdapter;
     private CheckBox selectAll;
+    private Button deleteAll;
     private Context context;
+    private FloatingActionButton fab;
+    private boolean deleteList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         container = (RelativeLayout) findViewById(R.id.contactContainer);
         selectAll = (CheckBox) findViewById(R.id.selectAll);
         recyclerView = (RecyclerView) findViewById(R.id.contactList);
+        deleteAll = (Button) findViewById(R.id.deleteAll);
 
         selectAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -78,7 +83,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        deleteAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!deleteList) {
+                    deleteList = true;
+                    deleteAll.setText(R.string.delete_cancel);
+                    fab.setImageResource(R.drawable.ic_delete_white_24dp);
+
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            deleteSelectedContacts();
+                        }
+                    });
+
+                    createScreen(deleteList);
+
+                } else {
+                    deleteList = false;
+                    deleteAll.setText(R.string.delete_all_contacts);
+                    fab.setImageResource(R.drawable.ic_add_white_24dp);
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            FragmentManager fm = getSupportFragmentManager();
+                            ContactFragment cf = new ContactFragment();
+                            cf.setContext(context);
+                            cf.show(fm, "New contact");
+
+                        }
+                    });
+
+                    createScreen();
+                }
+
+            }
+        });
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,6 +161,27 @@ public class MainActivity extends AppCompatActivity {
         selectAll.setChecked(false);
     }
 
+    public void createScreen(boolean flag) {
+
+        List<Contact> contacts = Cache.getInstance().getContacts(this.context);
+
+        if (contacts.size() == 0 || contacts == null) {
+            noContactsLabel.setVisibility(View.VISIBLE);
+            container.setVisibility(View.GONE);
+        } else {
+            noContactsLabel.setVisibility(View.GONE);
+            container.setVisibility(View.VISIBLE);
+
+            listAdapter = new ListAdapter(contacts, this.context, flag);
+
+            LinearLayoutManager lm = new LinearLayoutManager(this.context);
+            recyclerView.setLayoutManager(lm);
+            recyclerView.setAdapter(listAdapter);
+        }
+
+        selectAll.setChecked(false);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -126,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendSms() {
 
-        SmsManager manager = SmsManager.getDefault();
+
 
         List<Contact> contactsForSend = new ArrayList<>();
 
@@ -144,26 +210,9 @@ public class MainActivity extends AppCompatActivity {
 
                 Collections.sort(contactsForSend);
 
-                Log.d("==CONTACT_ORDED==", contactsForSend.toString());
+                new Kevin(contactsForSend).execute();
 
-                for (int i =0; i < contactsForSend.size(); i++) {
-                    Contact c = contactsForSend.get(i);
-                    if (!c.isAlreadySent()) {
-                        Log.d("==CONTACT==", c.toString());
-                        manager.sendTextMessage(c.getContactNumber(),
-                                null,
-                                getString(R.string.sent_msg_text, c.getContactName()),
-                                null,
-                                null);
-
-                        c.setAlreadySent(true);
-
-
-                        Cache.getInstance().saveContact(context, c);
-                    }
-                }
-
-                createScreen();
+                // createScreen();
 
 
             } else {
@@ -256,5 +305,115 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteSelectedContacts() {
+        List<Contact> contactsForSend = new ArrayList<>();
+
+        for (CheckBox box : listAdapter.getCheckBoxes()) {
+
+            if (box.isChecked()) {
+
+                contactsForSend.add((Contact) box.getTag());
+
+            }
+
+        }
+
+        if (contactsForSend.size() > 0) {
+
+            for (int i = 0; i < contactsForSend.size(); i++) {
+                Cache.getInstance().removeContact(context, contactsForSend.get(i));
+            }
+
+            this.deleteList = false;
+            deleteAll.setText(R.string.delete_all_contacts);
+            fab.setImageResource(R.drawable.ic_add_white_24dp);
+
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FragmentManager fm = getSupportFragmentManager();
+                    ContactFragment cf = new ContactFragment();
+                    cf.setContext(context);
+                    cf.show(fm, "New contact");
+                }
+            });
+
+            createScreen();
+
+        } else {
+            Toast.makeText(context, R.string.error_delete_n_contacts, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public class Kevin extends AsyncTask<Void, String, Void> {
+
+        private List<Contact> list;
+        private ProgressDialog dialog;
+
+        public Kevin(List<Contact> list) {
+            this.list = list;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            dialog = new ProgressDialog(context);
+            dialog.setMessage(context.
+                    getResources().
+                    getString(R.string.loading_msg));
+            dialog.setCancelable(false);
+
+            dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            SmsManager manager = SmsManager.getDefault();
+            for (int i = 0; i < list.size(); i++) {
+                Contact c = list.get(i);
+                Log.d("==CONTACT==", c.getContactName());
+                if (!c.isAlreadySent()) {
+
+                    publishProgress(c.getContactName());
+
+                    manager.sendTextMessage(c.getContactNumber(),
+                            null,
+                            getString(R.string.sent_msg_text, c.getContactName()),
+                            null,
+                            null);
+
+                    c.setAlreadySent(true);
+
+
+                    Cache.getInstance().saveContact(context, c);
+
+                    try {
+                        Thread.sleep(2 * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+
+            dialog.setMessage(context.getResources().getString(R.string.sent_to, values[0]));
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            dialog.dismiss();
+            createScreen();
+        }
     }
 }

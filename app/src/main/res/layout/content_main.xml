@@ -32,6 +32,12 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true">
 
+
+        <RelativeLayout
+            android:id="@+id/controlList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
     <CheckBox
         android:id="@+id/selectAll"
         android:layout_width="wrap_content"
@@ -39,9 +45,22 @@
         android:buttonTint="@color/colorPrimaryDark"
         android:layout_height="wrap_content" />
 
+            <Button
+                android:id="@+id/deleteAll"
+                android:visibility="visible"
+                android:layout_width="wrap_content"
+                android:text="@string/delete_all_contacts"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+        </RelativeLayout>
+
     <android.support.v7.widget.RecyclerView
         android:layout_marginTop="5dp"
-        android:layout_below="@id/selectAll"
+        android:animateLayoutChanges="true"
+        android:layout_below="@id/controlList"
         android:id="@+id/contactList"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
